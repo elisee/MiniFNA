@@ -1,239 +1,242 @@
-﻿#region License
-/*
-MIT License
-Copyright © 2006 The Mono.Xna Team
+#region License
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
 
-All rights reserved.
+/* Derived from code by the Mono.Xna Team (Copyright 2006).
+ * Released under the MIT License. See monoxna.LICENSE for details.
+ */
+#endregion
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-#endregion License
-
+#region Using Statements
 using System;
-using System.ComponentModel;
+using System.Diagnostics;
+#endregion
 
 namespace Microsoft.Xna.Framework
 {
-	internal class PlaneHelper
-    {
-        /// <summary>
-        /// Returns a value indicating what side (positive/negative) of a plane a point is
-        /// </summary>
-        /// <param name="point">The point to check with</param>
-        /// <param name="plane">The plane to check against</param>
-        /// <returns>Greater than zero if on the positive side, less than zero if on the negative size, 0 otherwise</returns>
-        public static float ClassifyPoint(ref Vector3 point, ref Plane plane)
-        {
-            return point.X * plane.Normal.X + point.Y * plane.Normal.Y + point.Z * plane.Normal.Z + plane.D;
-        }
+	[Serializable]
+	[DebuggerDisplay("{DebugDisplayString,nq}")]
+	public struct Plane : IEquatable<Plane>
+	{
+		#region Internal Properties
 
-        /// <summary>
-        /// Returns the perpendicular distance from a point to a plane
-        /// </summary>
-        /// <param name="point">The point to check</param>
-        /// <param name="plane">The place to check</param>
-        /// <returns>The perpendicular distance from the point to the plane</returns>
-        public static float PerpendicularDistance(ref Vector3 point, ref Plane plane)
-        {
-            // dist = (ax + by + cz + d) / sqrt(a*a + b*b + c*c)
-            return (float)Math.Abs((plane.Normal.X * point.X + plane.Normal.Y * point.Y + plane.Normal.Z * point.Z)
-                                    / Math.Sqrt(plane.Normal.X * plane.Normal.X + plane.Normal.Y * plane.Normal.Y + plane.Normal.Z * plane.Normal.Z));
-        }
-    }
-	
-    public struct Plane : IEquatable<Plane>
-    {
-        #region Public Fields
+		internal string DebugDisplayString
+		{
+			get
+			{
+				return string.Concat(
+					Normal.DebugDisplayString, " ",
+					D.ToString()
+				);
+			}
+		}
 
-        public float D;
-        public Vector3 Normal;
+		#endregion
 
-        #endregion Public Fields
+		#region Public Fields
 
+		public float D;
+		public Vector3 Normal;
 
-        #region Constructors
+		#endregion
 
-        public Plane(Vector4 value)
-            : this(new Vector3(value.X, value.Y, value.Z), value.W)
-        {
+		#region Public Constructors
 
-        }
+		public Plane(Vector4 value)
+			: this(new Vector3(value.X, value.Y, value.Z), value.W)
+		{
+		}
 
-        public Plane(Vector3 normal, float d)
-        {
-            Normal = normal;
-            D = d;
-        }
+		public Plane(Vector3 normal, float d)
+		{
+			Normal = normal;
+			D = d;
+		}
 
-        public Plane(Vector3 a, Vector3 b, Vector3 c)
-        {
-            Vector3 ab = b - a;
-            Vector3 ac = c - a;
+		public Plane(Vector3 a, Vector3 b, Vector3 c)
+		{
+			Vector3 ab = b - a;
+			Vector3 ac = c - a;
 
-            Vector3 cross = Vector3.Cross(ab, ac);
-            Normal = Vector3.Normalize(cross);
-            D = -(Vector3.Dot(cross, a));
-        }
+			Vector3 cross = Vector3.Cross(ab, ac);
+			Normal = Vector3.Normalize(cross);
+			D = -(Vector3.Dot(Normal, a));
+		}
 
-        public Plane(float a, float b, float c, float d)
-            : this(new Vector3(a, b, c), d)
-        {
+		public Plane(float a, float b, float c, float d)
+			: this(new Vector3(a, b, c), d)
+		{
 
-        }
+		}
 
-        #endregion Constructors
+		#endregion
 
+		#region Public Methods
 
-        #region Public Methods
+		public float Dot(Vector4 value)
+		{
+			return (
+				(this.Normal.X * value.X) +
+				(this.Normal.Y * value.Y) +
+				(this.Normal.Z * value.Z) +
+				(this.D * value.W)
+			);
+		}
 
-        public float Dot(Vector4 value)
-        {
-            return ((((this.Normal.X * value.X) + (this.Normal.Y * value.Y)) + (this.Normal.Z * value.Z)) + (this.D * value.W));
-        }
+		public void Dot(ref Vector4 value, out float result)
+		{
+			result = (
+				(this.Normal.X * value.X) +
+				(this.Normal.Y * value.Y) +
+				(this.Normal.Z * value.Z) +
+				(this.D * value.W)
+			);
+		}
 
-        public void Dot(ref Vector4 value, out float result)
-        {
-            result = (((this.Normal.X * value.X) + (this.Normal.Y * value.Y)) + (this.Normal.Z * value.Z)) + (this.D * value.W);
-        }
+		public float DotCoordinate(Vector3 value)
+		{
+			return (
+				(this.Normal.X * value.X) +
+				(this.Normal.Y * value.Y) +
+				(this.Normal.Z * value.Z) +
+				this.D
+			);
+		}
 
-        public float DotCoordinate(Vector3 value)
-        {
-            return ((((this.Normal.X * value.X) + (this.Normal.Y * value.Y)) + (this.Normal.Z * value.Z)) + this.D);
-        }
+		public void DotCoordinate(ref Vector3 value, out float result)
+		{
+			result = (
+				(this.Normal.X * value.X) +
+				(this.Normal.Y * value.Y) +
+				(this.Normal.Z * value.Z) +
+				this.D
+			);
+		}
 
-        public void DotCoordinate(ref Vector3 value, out float result)
-        {
-            result = (((this.Normal.X * value.X) + (this.Normal.Y * value.Y)) + (this.Normal.Z * value.Z)) + this.D;
-        }
+		public float DotNormal(Vector3 value)
+		{
+			return (
+				(this.Normal.X * value.X) +
+				(this.Normal.Y * value.Y) +
+				(this.Normal.Z * value.Z)
+			);
+		}
 
-        public float DotNormal(Vector3 value)
-        {
-            return (((this.Normal.X * value.X) + (this.Normal.Y * value.Y)) + (this.Normal.Z * value.Z));
-        }
+		public void DotNormal(ref Vector3 value, out float result)
+		{
+			result = (
+				(this.Normal.X * value.X) +
+				(this.Normal.Y * value.Y) +
+				(this.Normal.Z * value.Z)
+			);
+		}
 
-        public void DotNormal(ref Vector3 value, out float result)
-        {
-            result = ((this.Normal.X * value.X) + (this.Normal.Y * value.Y)) + (this.Normal.Z * value.Z);
-        }
-
-        public static void Transform(ref Plane plane, ref Quaternion rotation, out Plane result)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Transform(ref Plane plane, ref Matrix matrix, out Plane result)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Plane Transform(Plane plane, Quaternion rotation)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Plane Transform(Plane plane, Matrix matrix)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Normalize()
-        {
+		public void Normalize()
+		{
 			float factor;
 			Vector3 normal = Normal;
 			Normal = Vector3.Normalize(Normal);
-			factor = (float)Math.Sqrt(Normal.X * Normal.X + Normal.Y * Normal.Y + Normal.Z * Normal.Z) / 
-					(float)Math.Sqrt(normal.X * normal.X + normal.Y * normal.Y + normal.Z * normal.Z);
+			factor = (float) Math.Sqrt(
+				Normal.X * Normal.X +
+				Normal.Y * Normal.Y +
+				Normal.Z * Normal.Z
+			) / (float) Math.Sqrt(
+				normal.X * normal.X +
+				normal.Y * normal.Y +
+				normal.Z * normal.Z
+			);
 			D = D * factor;
-        }
+		}
 
-        public static Plane Normalize(Plane value)
-        {
+		public PlaneIntersectionType Intersects(BoundingBox box)
+		{
+			return box.Intersects(this);
+		}
+
+		public void Intersects(ref BoundingBox box, out PlaneIntersectionType result)
+		{
+			box.Intersects(ref this, out result);
+		}
+
+		public PlaneIntersectionType Intersects(BoundingSphere sphere)
+		{
+			return sphere.Intersects(this);
+		}
+
+		public void Intersects(ref BoundingSphere sphere, out PlaneIntersectionType result)
+		{
+			sphere.Intersects(ref this, out result);
+		}
+
+		#endregion
+
+		#region Public Static Methods
+
+		public static Plane Normalize(Plane value)
+		{
 			Plane ret;
 			Normalize(ref value, out ret);
 			return ret;
-        }
+		}
 
-        public static void Normalize(ref Plane value, out Plane result)
-        {
+		public static void Normalize(ref Plane value, out Plane result)
+		{
 			float factor;
 			result.Normal = Vector3.Normalize(value.Normal);
-			factor = (float)Math.Sqrt(result.Normal.X * result.Normal.X + result.Normal.Y * result.Normal.Y + result.Normal.Z * result.Normal.Z) / 
-					(float)Math.Sqrt(value.Normal.X * value.Normal.X + value.Normal.Y * value.Normal.Y + value.Normal.Z * value.Normal.Z);
+			factor = (float) Math.Sqrt(
+				result.Normal.X * result.Normal.X +
+				result.Normal.Y * result.Normal.Y +
+				result.Normal.Z * result.Normal.Z
+			) / (float) Math.Sqrt(
+				value.Normal.X * value.Normal.X +
+				value.Normal.Y * value.Normal.Y +
+				value.Normal.Z * value.Normal.Z
+			);
 			result.D = value.D * factor;
-        }
+		}
 
-        public static bool operator !=(Plane plane1, Plane plane2)
-        {
-            return !plane1.Equals(plane2);
-        }
+		#endregion
 
-        public static bool operator ==(Plane plane1, Plane plane2)
-        {
-            return plane1.Equals(plane2);
-        }
+		#region Public Static Operators and Override Methods
 
-        public override bool Equals(object other)
-        {
-            return (other is Plane) ? this.Equals((Plane)other) : false;
-        }
+		public static bool operator !=(Plane plane1, Plane plane2)
+		{
+			return !plane1.Equals(plane2);
+		}
 
-        public bool Equals(Plane other)
-        {
-            return ((Normal == other.Normal) && (D == other.D));
-        }
+		public static bool operator ==(Plane plane1, Plane plane2)
+		{
+			return plane1.Equals(plane2);
+		}
 
-        public override int GetHashCode()
-        {
-            return Normal.GetHashCode() ^ D.GetHashCode();
-        }
+		public override bool Equals(object other)
+		{
+			return (other is Plane) ? this.Equals((Plane) other) : false;
+		}
 
-        public PlaneIntersectionType Intersects(BoundingBox box)
-        {
-            return box.Intersects(this);
-        }
+		public bool Equals(Plane other)
+		{
+			return ((Normal == other.Normal) && (MathHelper.WithinEpsilon(D, other.D)));
+		}
 
-        public void Intersects(ref BoundingBox box, out PlaneIntersectionType result)
-        {
-            result = Intersects(box);
-        }
+		public override int GetHashCode()
+		{
+			return Normal.GetHashCode() ^ D.GetHashCode();
+		}
 
-        public PlaneIntersectionType Intersects(BoundingFrustum frustum)
-        {
-            return frustum.Intersects(this);
-        }
+		public override string ToString()
+		{
+			return (
+				"{{Normal:" + Normal.ToString() +
+				" D:" + D.ToString() +
+				"}}"
+			);
+		}
 
-        public PlaneIntersectionType Intersects(BoundingSphere sphere)
-        {
-            return sphere.Intersects(this);
-        }
-
-        public void Intersects(ref BoundingSphere sphere, out PlaneIntersectionType result)
-        {
-            result = Intersects(sphere);
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{{Normal:{0} D:{1}}}", Normal, D);
-        }
-
-        #endregion
-    }
+		#endregion
+	}
 }
-

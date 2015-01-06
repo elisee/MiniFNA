@@ -1,76 +1,107 @@
-﻿using System;
+#region License
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
+#endregion
+
+#region Using Statements
+using System;
+#endregion
 
 namespace Microsoft.Xna.Framework.Graphics.PackedVector
 {
-    public struct HalfSingle : IPackedVector<UInt16>, IEquatable<HalfSingle>, IPackedVector
-    {
-        UInt16 packedValue;
+	public struct HalfSingle : IPackedVector<UInt16>, IEquatable<HalfSingle>, IPackedVector
+	{
+		#region Public Properties
 
-        public HalfSingle(float single)
-        {
-            packedValue = HalfTypeHelper.convert(single);
-        }
+		[CLSCompliant(false)]
+		public ushort PackedValue
+		{
+			get
+			{
+				return packedValue;
+			}
+			set
+			{
+				packedValue = value;
+			}
+		}
 
-        public ushort PackedValue
-        {
-            get
-            {
-                return this.packedValue;
-            }
-            set
-            {
-                this.packedValue = value;
-            }
-        }
+		#endregion
 
-        public float ToSingle()
-        {
-            return HalfTypeHelper.convert(this.packedValue);
-        }
+		#region Private Variables
 
-        void IPackedVector.PackFromVector4(Vector4 vector)
-        {
-            this.packedValue = HalfTypeHelper.convert(vector.X);
-        }
+		private UInt16 packedValue;
 
-        Vector4 IPackedVector.ToVector4()
-        {
-            return new Vector4(this.ToSingle(), 0f, 0f, 1f);
-        }
+		#endregion
 
-        public override bool Equals(object obj)
-        {
-            if (obj != null && obj.GetType() == this.GetType())
-            {
-                return this == (HalfSingle)obj;
-            }
+		#region Public Constructors
 
-            return false;
-        }
+		public HalfSingle(float single)
+		{
+			packedValue = HalfTypeHelper.Convert(single);
+		}
 
-        public bool Equals(HalfSingle other)
-        {
-            return this.packedValue == other.packedValue;
-        }
+		#endregion
 
-        public override string ToString()
-        {
-            return this.ToSingle().ToString();
-        }
+		#region Public Methods
 
-        public override int GetHashCode()
-        {
-            return this.packedValue.GetHashCode();
-        }
+		public float ToSingle()
+		{
+			return HalfTypeHelper.Convert(packedValue);
+		}
 
-        public static bool operator ==(HalfSingle lhs, HalfSingle rhs)
-        {
-            return lhs.packedValue == rhs.packedValue;
-        }
+		#endregion
 
-        public static bool operator !=(HalfSingle lhs, HalfSingle rhs)
-        {
-            return lhs.packedValue != rhs.packedValue;
-        }
-    }
+		#region IPackedVector Methods
+
+		void IPackedVector.PackFromVector4(Vector4 vector)
+		{
+			packedValue = HalfTypeHelper.Convert(vector.X);
+		}
+
+		Vector4 IPackedVector.ToVector4()
+		{
+			return new Vector4(ToSingle(), 0f, 0f, 1f);
+		}
+
+		#endregion
+
+		#region Public Static Operators and Override Methods
+
+		public override bool Equals(object obj)
+		{
+			return (obj is HalfSingle) && Equals((HalfSingle) obj);
+		}
+
+		public bool Equals(HalfSingle other)
+		{
+			return packedValue == other.packedValue;
+		}
+
+		public override string ToString()
+		{
+			return ToSingle().ToString();
+		}
+
+		public override int GetHashCode()
+		{
+			return packedValue.GetHashCode();
+		}
+
+		public static bool operator ==(HalfSingle lhs, HalfSingle rhs)
+		{
+			return lhs.packedValue == rhs.packedValue;
+		}
+
+		public static bool operator !=(HalfSingle lhs, HalfSingle rhs)
+		{
+			return lhs.packedValue != rhs.packedValue;
+		}
+
+		#endregion
+	}
 }

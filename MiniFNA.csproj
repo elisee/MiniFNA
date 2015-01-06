@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4CD7AF26-FAD9-4ED4-A3A5-AB96FAE61034}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>MonoGame.Framework</RootNamespace>
-    <AssemblyName>MonoGameMini</AssemblyName>
+    <RootNamespace>Microsoft.Xna.Framework</RootNamespace>
+    <AssemblyName>MiniFNA</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
@@ -44,6 +44,12 @@
     <Compile Include="CurveKeyCollection.cs" />
     <Compile Include="CurveLoopType.cs" />
     <Compile Include="CurveTangent.cs" />
+    <Compile Include="Design\ColorConverter.cs" />
+    <Compile Include="Design\PointConverter.cs" />
+    <Compile Include="Design\Vector2Converter.cs" />
+    <Compile Include="Design\Vector3Converter.cs" />
+    <Compile Include="Design\Vector4Converter.cs" />
+    <Compile Include="Design\VectorConversion.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="PlaneIntersectionType.cs" />
     <Compile Include="Point.cs" />
@@ -71,8 +77,5 @@
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Input\" />
-    <Folder Include="Graphics\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

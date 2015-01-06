@@ -1,164 +1,169 @@
 #region License
-/*
-MIT License
-Copyright © 2006 The Mono.Xna Team
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
 
-All rights reserved.
+/* Derived from code by the Mono.Xna Team (Copyright 2006).
+ * Released under the MIT License. See monoxna.LICENSE for details.
+ */
+#endregion
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-#endregion License
+#region Using Statements
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#endregion
 
 namespace Microsoft.Xna.Framework
 {
-    public class CurveKeyCollection : ICollection<CurveKey>, IEnumerable<CurveKey>, IEnumerable
-    {
-        #region Private Fields
+	public class CurveKeyCollection : ICollection<CurveKey>, IEnumerable<CurveKey>, IEnumerable
+	{
+		#region Public Properties
 
-        private bool isReadOnly = false;
-        private List<CurveKey> innerlist;
+		public int Count
+		{
+			get
+			{
+				return innerlist.Count;
+			}
+		}
 
-        #endregion Private Fields
+		public bool IsReadOnly
+		{
+			get
+			{
+				return this.isReadOnly;
+			}
+		}
 
+		public CurveKey this[int index]
+		{
+			get
+			{
+				return innerlist[index];
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
 
-        #region Properties
+				if (index >= innerlist.Count)
+				{
+					throw new IndexOutOfRangeException();
+				}
 
-        public int Count
-        {
-            get { return innerlist.Count; }
-        }
+				if (MathHelper.WithinEpsilon(innerlist[index].Position, value.Position))
+				{
+					innerlist[index] = value;
+				}
+				else
+				{
+					innerlist.RemoveAt(index);
+					innerlist.Add(value);
+				}
+			}
+		}
 
-        public bool IsReadOnly
-        {
-            get { return this.isReadOnly; }
-        }
+		#endregion
 
-        public CurveKey this[int index]
-        {
-            get { return innerlist[index]; }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException();
+		#region Private Fields
 
-                if (index >= innerlist.Count)
-                    throw new IndexOutOfRangeException();
+		private bool isReadOnly = false;
+		private List<CurveKey> innerlist;
 
-                if (innerlist[index].Position == value.Position)
-                    innerlist[index] = value;
-                else
-                {
-                    innerlist.RemoveAt(index);
-                    innerlist.Add(value);
-                }
-            }
-        }
+		#endregion
 
-        #endregion Properties
+		#region Public Constructors
 
+		public CurveKeyCollection()
+		{
+			innerlist = new List<CurveKey>();
+		}
 
-        #region Constructors
+		#endregion
 
-        public CurveKeyCollection()
-        {
-            innerlist = new List<CurveKey>();
-        }
+		#region Public Methods
 
-        #endregion Constructors
+		public void Add(CurveKey item)
+		{
+			if (item == null)
+			{
+				throw new ArgumentNullException("item");
+			}
 
+			if (innerlist.Count == 0)
+			{
+				this.innerlist.Add(item);
+				return;
+			}
 
-        #region Public Methods
+			for (int i = 0; i < this.innerlist.Count; i += 1)
+			{
+				if (item.Position < this.innerlist[i].Position)
+				{
+					this.innerlist.Insert(i, item);
+					return;
+				}
+			}
 
-        public void Add(CurveKey item)
-        {
-            if (item == null)
-                throw new ArgumentNullException();
+			this.innerlist.Add(item);
+		}
 
-            if (innerlist.Count == 0)
-            {
-                this.innerlist.Add(item);
-                return;
-            }
+		public void Clear()
+		{
+			innerlist.Clear();
+		}
 
-            for (int i = 0; i < this.innerlist.Count; i++)
-            {
-                if (item.Position < this.innerlist[i].Position)
-                {
-                    this.innerlist.Insert(i, item);
-                    return;
-                }
-            }
+		public CurveKeyCollection Clone()
+		{
+			CurveKeyCollection ckc = new CurveKeyCollection();
+			foreach (CurveKey key in this.innerlist)
+			{
+				ckc.Add(key);
+			}
+			return ckc;
+		}
 
-            this.innerlist.Add(item);
-        }
+		public bool Contains(CurveKey item)
+		{
+			return innerlist.Contains(item);
+		}
 
-        public void Clear()
-        {
-            innerlist.Clear();
-        }
-        
-        public CurveKeyCollection Clone()
-        {
-            CurveKeyCollection ckc = new CurveKeyCollection();
-            foreach (CurveKey key in this.innerlist)
-                ckc.Add(key);
-            return ckc;
-        }
-        
-        public bool Contains(CurveKey item)
-        {
-            return innerlist.Contains(item);
-        }
-        
-        public void CopyTo(CurveKey[] array, int arrayIndex)
-        {
-            innerlist.CopyTo(array, arrayIndex);
-        }
-        
-        public IEnumerator<CurveKey> GetEnumerator()
-        {
-            return innerlist.GetEnumerator();
-        }
-        
-        public int IndexOf(CurveKey item)
-        {
-            return innerlist.IndexOf(item);
-        }
-        
-        public bool Remove(CurveKey item)
-        {
-            return innerlist.Remove(item);
-        }
-        
-        public void RemoveAt(int index)
-        {
-            innerlist.RemoveAt(index);
-        }
+		public void CopyTo(CurveKey[] array, int arrayIndex)
+		{
+			innerlist.CopyTo(array, arrayIndex);
+		}
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return innerlist.GetEnumerator();
-        }
+		public IEnumerator<CurveKey> GetEnumerator()
+		{
+			return innerlist.GetEnumerator();
+		}
 
-        #endregion Public Methods
-    }
+		public int IndexOf(CurveKey item)
+		{
+			return innerlist.IndexOf(item);
+		}
+
+		public bool Remove(CurveKey item)
+		{
+			return innerlist.Remove(item);
+		}
+
+		public void RemoveAt(int index)
+		{
+			innerlist.RemoveAt(index);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return innerlist.GetEnumerator();
+		}
+
+		#endregion
+	}
 }
